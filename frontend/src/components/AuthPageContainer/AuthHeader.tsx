@@ -16,10 +16,10 @@ function AuthHeader(): JSX.Element {
 			<div className="auth-header-logo">
 				<img
 					src={signozBrandLogoUrl}
-					alt="SigNoz"
+					alt="Voltusfreight"
 					className="auth-header-logo-icon"
 				/>
-				<span className="auth-header-logo-text">SigNoz</span>
+				<span className="auth-header-logo-text">Voltusfreight</span>
 			</div>
 			<Button
 				className="auth-header-help-button"

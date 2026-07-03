@@ -156,7 +156,7 @@ func (module *setter) CreateBulkInvite(ctx context.Context, orgID valuer.UUID, i
 		tokenLifetime := module.config.Password.Invite.MaxTokenLifetime
 		humanizedTokenLifetime := strings.TrimSpace(humanize.RelTime(time.Now(), time.Now().Add(tokenLifetime), "", ""))
 
-		if err := module.emailing.SendHTML(ctx, userWithToken.User.Email.String(), "You're Invited to Join SigNoz", emailtypes.TemplateNameInvitationEmail, map[string]any{
+		if err := module.emailing.SendHTML(ctx, userWithToken.User.Email.String(), "You're invited: Voltusfreight", emailtypes.TemplateNameInvitationEmail, map[string]any{
 			"inviter_email": identityEmail.StringValue(),
 			"link":          resetLink,
 			"Expiry":        humanizedTokenLifetime,
@@ -265,7 +265,7 @@ func (module *setter) CreatePendingInviteUser(ctx context.Context, identityID va
 	tokenLifetime := module.config.Password.Invite.MaxTokenLifetime
 	humanizedTokenLifetime := strings.TrimSpace(humanize.RelTime(time.Now(), time.Now().Add(tokenLifetime), "", ""))
 
-	if err := module.emailing.SendHTML(ctx, user.Email.String(), "You're Invited to Join SigNoz", emailtypes.TemplateNameInvitationEmail, map[string]any{
+	if err := module.emailing.SendHTML(ctx, user.Email.String(), "You're invited: Voltusfreight", emailtypes.TemplateNameInvitationEmail, map[string]any{
 		"inviter_email": identityEmail.StringValue(),
 		"link":          resetLink,
 		"Expiry":        humanizedTokenLifetime,

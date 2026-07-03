@@ -1,0 +1,36 @@
+# All-in-one build of the Voltusfreight-branded SigNoz enterprise image.
+# Builds the frontend and the Go backend from source inside Docker, then
+# assembles the runtime image the same way cmd/enterprise/Dockerfile does.
+# Build with just Docker (no Go/Node needed on the host):
+#   docker build -f Dockerfile.voltusfreight -t signoz-voltusfreight:latest .
+
+# ---- Stage 1: frontend (Vite) ----
+FROM node:22 AS frontend
+WORKDIR /src/frontend
+ENV CI=1 NODE_OPTIONS=--max-old-space-size=8192
+RUN npm install -g pnpm@10
+COPY frontend/ ./
+RUN pnpm install && pnpm build
+# output: /src/frontend/build
+
+# ---- Stage 2: backend (Go enterprise binary) ----
+FROM golang:1.25 AS backend
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN mkdir -p /out && \
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -C cmd/enterprise -tags timetzdata \
+      -o /out/signoz \
+      -ldflags "-s -w -X github.com/SigNoz/signoz/pkg/version.variant=enterprise -X github.com/SigNoz/signoz/pkg/version.version=voltusfreight"
+
+# ---- Stage 3: runtime (mirrors cmd/enterprise/Dockerfile) ----
+FROM alpine:3.20.3
+LABEL maintainer="voltusfreight"
+WORKDIR /root
+RUN apk update && apk add --no-cache ca-certificates && rm -rf /var/cache/apk/*
+COPY --from=backend /out/signoz /root/signoz
+COPY templates /root/templates
+COPY --from=frontend /src/frontend/build/ /etc/signoz/web/
+RUN chmod 755 /root /root/signoz
+ENTRYPOINT ["./signoz", "server"]
